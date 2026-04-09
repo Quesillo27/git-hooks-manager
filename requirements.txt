@@ -1,0 +1,5 @@
+# Git Hooks Manager — no external dependencies required
+# Standard library only: os, sys, stat, json, shutil, argparse, pathlib
+
+# Development / testing
+pytest==8.1.1
