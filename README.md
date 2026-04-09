@@ -1,90 +1,101 @@
-# hookman — Git Hooks Manager
+# Git Hooks Manager
 
-![Python](https://img.shields.io/badge/python-3.8%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Tests](https://img.shields.io/badge/tests-pytest-orange)
+![Python](https://img.shields.io/badge/Python-3.8+-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
-Instala, gestiona y sincroniza git hooks entre proyectos. Incluye hooks integrados para seguridad, linting y convenciones de commits. Sin dependencias externas.
+CLI Python para instalar, gestionar y deshabilitar git hooks de forma automática en cualquier repositorio. Incluye hooks prediseñados para verificación de credenciales, linting, Conventional Commits y ejecución de tests.
 
 ## Instalación en 3 comandos
 
 ```bash
 git clone https://github.com/Quesillo27/git-hooks-manager
 cd git-hooks-manager
-pip install -e .
+pip install -r requirements.txt   # solo pytest para tests
 ```
 
 ## Uso
 
 ```bash
-hookman list                          # ver hooks disponibles
-hookman install pre-commit/no-secrets # instalar hook de seguridad
-hookman profile nodejs                # aplicar perfil completo Node.js
-hookman status                        # ver hooks instalados en repo actual
+# Ver todos los hooks disponibles e instalados en el repo actual
+python3 git_hooks_manager.py list
+
+# Instalar todos los hooks
+python3 git_hooks_manager.py install --all
+
+# Instalar hooks específicos
+python3 git_hooks_manager.py install pre-commit commit-msg
+
+# Desinstalar un hook
+python3 git_hooks_manager.py uninstall pre-push
+
+# Deshabilitar temporalmente (sin eliminar)
+python3 git_hooks_manager.py disable pre-commit
+
+# Rehabilitar
+python3 git_hooks_manager.py enable pre-commit
+
+# Ver contenido de un hook
+python3 git_hooks_manager.py show pre-commit
+
+# Instalar hook personalizado desde un archivo
+python3 git_hooks_manager.py add-custom pre-commit ./mi_hook.sh
 ```
 
-## Hooks integrados
-
-| Hook | Tipo | Descripción |
-|---|---|---|
-| `no-secrets` | pre-commit | Bloquea archivos con posibles credenciales |
-| `lint-python` | pre-commit | Ejecuta flake8 en archivos Python |
-| `lint-js` | pre-commit | Ejecuta ESLint en archivos JS/TS |
-| `no-large-files` | pre-commit | Bloquea archivos >1MB |
-| `conventional` | commit-msg | Valida formato Conventional Commits |
-| `run-tests` | pre-push | Ejecuta npm test o pytest antes del push |
-| `notify` | post-commit | Muestra resumen del commit |
-
-## Perfiles disponibles
+## Ejemplo
 
 ```bash
-hookman profile basic    # no-secrets + conventional-commits
-hookman profile python   # lint + tests + conventional + no-secrets
-hookman profile nodejs   # eslint + tests + conventional + no-secrets
-hookman profile strict   # todo lo anterior + no-large-files
+cd /mi/proyecto-git
+python3 /ruta/git_hooks_manager.py list
+# ============================================
+# 📂 Repo: /mi/proyecto-git
+# 🪝  Hooks dir: /mi/proyecto-git/.git/hooks
+#
+# Hook                 Estado       Descripción
+# ──────────────────────────────────────────────────────────────────────
+# pre-commit           ✅ installed  Verifica sintaxis, linting y credenciales
+# commit-msg           ⬜ available  Verifica formato Conventional Commits
+# pre-push             ⬜ available  Ejecuta tests antes de hacer push
+# post-merge           ⬜ available  Instala dependencias después de merge
+
+python3 /ruta/git_hooks_manager.py install commit-msg
+# ✅ Hook instalado: commit-msg
+# 🎉 1 hook(s) instalado(s)
 ```
 
-## Ejemplos
+## Hooks disponibles
 
-```bash
-# Instalar hook de Conventional Commits en el repo actual
-cd mi-proyecto
-hookman install commit-msg/conventional
-# → ✅ Hook instalado en mi-proyecto/.git/hooks/commit-msg
+| Hook | Descripción |
+|------|-------------|
+| `pre-commit` | Detecta credenciales hardcodeadas, verifica sintaxis Python/JS |
+| `commit-msg` | Valida formato [Conventional Commits](https://conventionalcommits.org) |
+| `pre-push` | Ejecuta `npm test` o `make test` antes de push |
+| `post-merge` | Reinstala dependencias si cambió `package.json` o `requirements.txt` |
 
-# Ver qué hooks están activos
-hookman status
-# → ✅ commit-msg   (247 bytes)
-# → ✅ pre-commit   (521 bytes)
+## Variables de entorno
 
-# Sincronizar hooks de un repo a otro
-hookman sync ./proyecto-a ./proyecto-b
-# → ✅ 3 hook(s) sincronizados
+No requiere variables de entorno. El script es completamente portable.
 
-# Agregar hook personalizado a la librería
-hookman add mi-hook.sh --type pre-commit --name check-todos
-```
-
-## Comandos disponibles
+## Opciones CLI
 
 | Comando | Descripción |
-|---|---|
-| `list` | Lista todos los hooks disponibles |
-| `install <hook>` | Instala un hook en el repo actual |
-| `uninstall <tipo>` | Elimina un hook del repo actual |
-| `status [path]` | Muestra hooks instalados |
-| `profile <nombre>` | Aplica un perfil de hooks |
-| `add <file>` | Agrega script personalizado a la librería |
-| `sync <src> <dst>` | Copia hooks entre repos |
+|---------|-------------|
+| `list` | Lista hooks disponibles e instalados |
+| `install [hook...]` | Instala hook(s). Sin argumentos instala todos |
+| `install --all` | Instala todos los hooks de la librería |
+| `install --force` | Sobreescribe sin crear backup |
+| `uninstall hook` | Elimina hook del repo |
+| `disable hook` | Deshabilita hook temporalmente (renombra a .disabled) |
+| `enable hook` | Rehabilita hook deshabilitado |
+| `show hook` | Muestra el contenido del hook |
+| `add-custom name file` | Instala hook personalizado desde archivo |
+| `--path/-p DIR` | Especifica el repo (default: directorio actual) |
 
-## Variables / Configuración
+## Tests
 
-Los perfiles personalizados se guardan en `~/.hookman/profiles.json`. Los hooks personalizados en `~/.hookman/library/`.
+```bash
+make test
+# ✅ Todos los tests pasaron (11/11)
+```
 
 ## Contribuir
 
-```bash
-make install   # instalar dependencias de dev
-make test      # correr tests
-make lint      # verificar código
-```
-
-PRs bienvenidos. Asegúrate de que `make test` pasa antes de enviar.
+PRs bienvenidos. Corre `make test` antes de enviar. Para agregar un hook a la librería, agrega una entrada al diccionario `HOOKS_LIBRARY` en `git_hooks_manager.py`.
