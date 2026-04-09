@@ -1,101 +1,52 @@
-# Git Hooks Manager
+# git-hooks-manager
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
+CLI Python para instalar y gestionar git hooks automaticamente en proyectos.
 
-CLI Python para instalar, gestionar y deshabilitar git hooks de forma automática en cualquier repositorio. Incluye hooks prediseñados para verificación de credenciales, linting, Conventional Commits y ejecución de tests.
-
-## Instalación en 3 comandos
+## Instalacion rapida
 
 ```bash
-git clone https://github.com/Quesillo27/git-hooks-manager
+git clone https://github.com/Quesillo27/git-hooks-manager.git
 cd git-hooks-manager
-pip install -r requirements.txt   # solo pytest para tests
+python git_hooks_manager.py install all
 ```
 
 ## Uso
 
 ```bash
-# Ver todos los hooks disponibles e instalados en el repo actual
-python3 git_hooks_manager.py list
-
 # Instalar todos los hooks
-python3 git_hooks_manager.py install --all
+python git_hooks_manager.py install all
 
-# Instalar hooks específicos
-python3 git_hooks_manager.py install pre-commit commit-msg
+# Instalar un hook especifico
+python git_hooks_manager.py install pre-commit
 
-# Desinstalar un hook
-python3 git_hooks_manager.py uninstall pre-push
+# Sobrescribir hook existente
+python git_hooks_manager.py install pre-commit --force
 
-# Deshabilitar temporalmente (sin eliminar)
-python3 git_hooks_manager.py disable pre-commit
+# Eliminar un hook
+python git_hooks_manager.py remove commit-msg
 
-# Rehabilitar
-python3 git_hooks_manager.py enable pre-commit
+# Listar estado de hooks
+python git_hooks_manager.py list
 
-# Ver contenido de un hook
-python3 git_hooks_manager.py show pre-commit
-
-# Instalar hook personalizado desde un archivo
-python3 git_hooks_manager.py add-custom pre-commit ./mi_hook.sh
-```
-
-## Ejemplo
-
-```bash
-cd /mi/proyecto-git
-python3 /ruta/git_hooks_manager.py list
-# ============================================
-# 📂 Repo: /mi/proyecto-git
-# 🪝  Hooks dir: /mi/proyecto-git/.git/hooks
-#
-# Hook                 Estado       Descripción
-# ──────────────────────────────────────────────────────────────────────
-# pre-commit           ✅ installed  Verifica sintaxis, linting y credenciales
-# commit-msg           ⬜ available  Verifica formato Conventional Commits
-# pre-push             ⬜ available  Ejecuta tests antes de hacer push
-# post-merge           ⬜ available  Instala dependencias después de merge
-
-python3 /ruta/git_hooks_manager.py install commit-msg
-# ✅ Hook instalado: commit-msg
-# 🎉 1 hook(s) instalado(s)
+# Operar en otro directorio
+python git_hooks_manager.py --path /otro/repo list
 ```
 
 ## Hooks disponibles
 
-| Hook | Descripción |
+| Hook | Descripcion |
 |------|-------------|
-| `pre-commit` | Detecta credenciales hardcodeadas, verifica sintaxis Python/JS |
-| `commit-msg` | Valida formato [Conventional Commits](https://conventionalcommits.org) |
-| `pre-push` | Ejecuta `npm test` o `make test` antes de push |
-| `post-merge` | Reinstala dependencias si cambió `package.json` o `requirements.txt` |
+| `pre-commit` | Verifica syntax Python y lint JS (si hay npm script) |
+| `commit-msg` | Valida que el mensaje tenga minimo 10 caracteres |
+| `pre-push` | Corre tests antes de push (npm test o make test) |
 
-## Variables de entorno
+## Requisitos
 
-No requiere variables de entorno. El script es completamente portable.
-
-## Opciones CLI
-
-| Comando | Descripción |
-|---------|-------------|
-| `list` | Lista hooks disponibles e instalados |
-| `install [hook...]` | Instala hook(s). Sin argumentos instala todos |
-| `install --all` | Instala todos los hooks de la librería |
-| `install --force` | Sobreescribe sin crear backup |
-| `uninstall hook` | Elimina hook del repo |
-| `disable hook` | Deshabilita hook temporalmente (renombra a .disabled) |
-| `enable hook` | Rehabilita hook deshabilitado |
-| `show hook` | Muestra el contenido del hook |
-| `add-custom name file` | Instala hook personalizado desde archivo |
-| `--path/-p DIR` | Especifica el repo (default: directorio actual) |
+- Python 3.8+
+- Sin dependencias externas (solo stdlib)
 
 ## Tests
 
 ```bash
-make test
-# ✅ Todos los tests pasaron (11/11)
+python tests/test_smoke.py
 ```
-
-## Contribuir
-
-PRs bienvenidos. Corre `make test` antes de enviar. Para agregar un hook a la librería, agrega una entrada al diccionario `HOOKS_LIBRARY` en `git_hooks_manager.py`.

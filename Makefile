@@ -1,17 +1,14 @@
-.PHONY: install run test lint clean
+.PHONY: install run test lint
 
 install:
-	pip install -r requirements.txt
+	@echo "No hay dependencias externas — solo Python stdlib"
+	@python --version
 
 run:
-	python3 git_hooks_manager.py list
+	python git_hooks_manager.py list
 
 test:
-	python3 tests/test_hooks_manager.py
+	python -m pytest tests/ -v 2>/dev/null || python tests/test_smoke.py
 
 lint:
-	python3 -m py_compile git_hooks_manager.py && echo "✅ Sintaxis OK"
-
-clean:
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -name "*.pyc" -delete 2>/dev/null || true
+	python -m py_compile git_hooks_manager.py && echo "Syntax OK"

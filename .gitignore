@@ -1,11 +1,10 @@
 __pycache__/
 *.pyc
 *.pyo
-.pytest_cache/
+.env
+venv/
+.venv/
 *.egg-info/
 dist/
 build/
-.venv/
-venv/
-*.log
-.git-hooks.json
+.pytest_cache/
