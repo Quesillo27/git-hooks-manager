@@ -1,14 +1,24 @@
-.PHONY: install run test lint
+.PHONY: install dev run test lint clean
+
+PY ?= python3
 
 install:
-	@echo "No hay dependencias externas — solo Python stdlib"
-	@python --version
+	pip install -e .
+
+dev:
+	pip install -e .[dev]
 
 run:
-	python git_hooks_manager.py list
+	$(PY) -m hookman list
 
 test:
-	python -m pytest tests/ -v 2>/dev/null || python tests/test_smoke.py
+	$(PY) -m pytest tests/ -v
 
 lint:
-	python -m py_compile git_hooks_manager.py && echo "Syntax OK"
+	$(PY) -m py_compile hookman/*.py hookman/commands/*.py hookman/hooks/*.py \
+		hookman.py git_hooks_manager.py && echo "Syntax OK"
+
+clean:
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
