@@ -42,6 +42,28 @@ def test_get_hooks_dir(git_repo):
     assert get_hooks_dir(git_repo) == git_repo / ".git" / "hooks"
 
 
+def test_get_hooks_dir_with_relative_gitdir(tmp_path):
+    repo = tmp_path / "worktree"
+    repo.mkdir()
+    git_dir = tmp_path / "actual-git-dir"
+    hooks_dir = git_dir / "hooks"
+    hooks_dir.mkdir(parents=True)
+    (repo / ".git").write_text("gitdir: ../actual-git-dir\n")
+
+    assert get_hooks_dir(repo) == hooks_dir.resolve()
+
+
+def test_get_hooks_dir_with_absolute_gitdir(tmp_path):
+    repo = tmp_path / "linked-repo"
+    repo.mkdir()
+    git_dir = tmp_path / "absolute-git-dir"
+    hooks_dir = git_dir / "hooks"
+    hooks_dir.mkdir(parents=True)
+    (repo / ".git").write_text(f"gitdir: {git_dir}\n")
+
+    assert get_hooks_dir(repo) == hooks_dir.resolve()
+
+
 def test_make_executable_sets_exec_bits(tmp_path):
     f = tmp_path / "script.sh"
     f.write_text("#!/bin/bash\necho hi")

@@ -66,6 +66,23 @@ def test_install_dry_run_does_not_write(git_repo):
     assert not (git_repo / ".git" / "hooks" / "pre-commit").exists()
 
 
+def test_install_writes_to_gitdir_hooks_when_dotgit_is_file(tmp_path):
+    repo = tmp_path / "worktree"
+    repo.mkdir()
+    git_dir = tmp_path / "worktree-git"
+    hooks_dir = git_dir / "hooks"
+    hooks_dir.mkdir(parents=True)
+    (repo / ".git").write_text("gitdir: ../worktree-git\n")
+
+    code = cmd_install(_args("pre-commit/no-secrets", repo))
+
+    assert code == 0
+    hook_file = hooks_dir / "pre-commit"
+    assert hook_file.exists()
+    assert is_executable(hook_file)
+    assert "hookman: no-secrets" in hook_file.read_text()
+
+
 def test_uninstall_removes_hook(git_repo):
     cmd_install(_args("pre-commit/no-secrets", git_repo))
     hook_file = git_repo / ".git" / "hooks" / "pre-commit"

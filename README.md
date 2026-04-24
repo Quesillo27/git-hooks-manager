@@ -1,11 +1,12 @@
 # git-hooks-manager
 
 ![python](https://img.shields.io/badge/python-3.8+-blue)
-![tests](https://img.shields.io/badge/tests-91%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-94%20passing-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
 CLI Python modular para instalar, gestionar y sincronizar git hooks entre proyectos.
 Sin dependencias externas (solo stdlib).
+Soporta repos git normales, worktrees y setups donde `.git` apunta a un `gitdir` externo.
 
 ## Instalación en 3 comandos
 
@@ -142,7 +143,7 @@ python -m pytest tests/ -v
 make test
 ```
 
-91 tests unitarios + de integración (100% pass). Cada test usa fixture
+94 tests unitarios + de integración (100% pass). Cada test usa fixture
 `isolated_hookman_home` para no tocar `~/.hookman` real.
 
 ## Desarrollo

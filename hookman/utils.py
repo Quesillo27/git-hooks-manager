@@ -23,12 +23,23 @@ def find_git_root(path: Optional[Path] = None) -> Optional[Path]:
 
 
 def get_hooks_dir(repo_path: Path) -> Path:
-    """Devuelve el directorio de hooks del repo (incluye soporte para worktrees).
+    """Devuelve el directorio de hooks real del repo.
 
-    Si .git es un archivo (worktree), no resolvemos `gitdir` — devolvemos la
-    ruta clásica .git/hooks.
+    Soporta repos normales (`.git/` directorio) y worktrees/submódulos donde
+    `.git` es un archivo con `gitdir: ...`.
     """
-    return repo_path / ".git" / "hooks"
+    git_ref = repo_path / ".git"
+    if git_ref.is_dir():
+        return git_ref / "hooks"
+
+    if git_ref.is_file():
+        content = git_ref.read_text().strip()
+        prefix = "gitdir:"
+        if content.lower().startswith(prefix):
+            git_dir = content[len(prefix):].strip()
+            return (repo_path / git_dir).resolve() / "hooks"
+
+    return git_ref / "hooks"
 
 
 def make_executable(path: Path) -> None:
